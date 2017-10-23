@@ -5,22 +5,27 @@ import org.apache.spark.SparkContext._
 import twitter4j._
 import twitter4j.conf._
 import twitter4j.json._
+import org.apache.log4j.Level
 /*import org.apache.spark.streaming._
 import org.apache.spark.streaming.twitter._
 import org.apache.spark.streaming.StreamingContext._ */
 import Utilities._
 
-
 object Stream extends RawStreamListener {
-  def main(args:Array[String]):Unit = { 
-    val stream = new TwitterStreamFactory(Utilities.config).getInstance()
-    stream.addListener(this)
-    stream.sample()
+  setupLogging()
+
+  def main(args: Array[String]): Unit = {
+    val twitterStream = new TwitterStreamFactory(Utilities.config).getInstance()
+    twitterStream.addListener(this)
+    twitterStream.filter(new FilterQuery().track(args))
+    Thread.sleep(5000)
+    twitterStream.cleanUp
+    twitterStream.shutdown
   }
-  def onMessage(rawString:String):Unit = {
+  def onMessage(rawString: String): Unit = {
     System.out.println(rawString)
   }
-  def onException(ex:Exception):Unit = {
+  def onException(ex: Exception): Unit = {
     ex.printStackTrace()
   }
 }
